@@ -45,6 +45,28 @@ class vkReq:
         #print(self.LastResponse.text)
         self.name = re.findall(r'class=\"page_name\">*([\D]+)<',self.LastResponse.text)[0]
 
+    def sendMessage(self,peer,text):
+        data = {"act": "a_start",
+                "al": "1",
+                "block": "true",
+                "gid": "0",
+                "history": "false",
+                "im_v": "2",
+                "msgid": "false",
+                "peer": peer
+                }
+        self.SendRequest('/al_im.php',post = data)
+        hash = (re.findall(r'"hash":"*([a-z0-9_]+)',self.LastResponse.text))[0]
+        data = {"act": "a_send",
+                "al": "1",
+                "hash": hash,
+                "gid": "0",
+                "msg": text,
+                "im_v": "2",
+                "to": peer}
+        self.SendRequest('/al_im.php', post=data)
+        return (True)
+
 
 
     def SendRequest(self,endpoint,predomain = '',post = None,login = False):
