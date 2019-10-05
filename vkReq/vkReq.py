@@ -68,7 +68,36 @@ class vkReq:
         return (True)
 
 
+    def create_chat(self,peers,title):
+        self.SendRequest('/im')
+        hash =  re.findall(r'"writeHash":"*([a-z0-9_]+)',self.LastResponse.text)
+        data = {"act": "a_multi_start",
+                "al": "1",
+                "hash": hash,
+                "im_v": "2",
+                "peers": (','.join(map(str,peers))),
+                "title": title,
+                }
+        self.SendRequest('/al_im.php',post=data)
+        chatid = re.findall(r'"peerId":*([0-9]+)', self.LastResponse.text)[0]
+        return chatid
 
+    def get_friends(self):
+        data = {"act": "load_friends_silent",
+                "al": "1",
+                "gid": "0",
+                "id" : self.userid
+                }
+        self.SendRequest('/al_friends.php',post = data)
+        b = json.loads(self.LastResponse.text[4:])
+        b = b['payload'][1][0]
+        b = json.loads(b)
+        b = b['all']
+        friends_list = []
+        for i in b:
+            friends_list.append(i[0])
+        return friends_list
+    
     def SendRequest(self,endpoint,predomain = '',post = None,login = False):
         self.s.headers.update({'Connection': 'close',
                                'Accept': '*/*',
